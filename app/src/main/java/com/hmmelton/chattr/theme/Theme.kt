@@ -1,4 +1,4 @@
-package com.hmmelton.chattr.ui.theme
+package com.hmmelton.chattr.theme
 
 import android.app.Activity
 import android.os.Build

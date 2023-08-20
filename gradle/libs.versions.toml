@@ -1,0 +1,26 @@
+[versions]
+agp = "8.1.0"
+kotlin = "1.7.20"
+core-ktx = "1.10.1"
+lifecycle-ktx = "2.6.1"
+activity-compose = "1.7.2"
+junit = "4.13.2"
+junit-ext = "1.1.5"
+espresso-core = "3.5.1"
+ktlintPlugin = "11.5.1"
+detektPlugin = "1.23.1"
+
+[libraries]
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-ktx"}
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose"}
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-ext = { group = "androidx.test.ext", name = "junit", version.ref = "junit-ext" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektPlugin" }

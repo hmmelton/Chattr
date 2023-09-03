@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Chattr</string>
+
+    <!-- Error messages -->
+    <string name="login_error_message">Error logging in</string>
 </resources>

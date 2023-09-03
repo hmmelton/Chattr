@@ -7,6 +7,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.hmmelton.chattr.R
 import com.hmmelton.chattr.auth.data.AuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -43,7 +44,7 @@ class AuthViewModel @Inject constructor(
                 _uiState.emit(AuthUiState.ReadyForGoogleAuth(intentSenderRequest))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to create Google One Tap IntentSenderRequest", e)
-                _uiState.emit(AuthUiState.Failure(0))
+                _uiState.emit(AuthUiState.Failure(R.string.login_error_message))
             }
         }
     }
@@ -55,7 +56,7 @@ class AuthViewModel @Inject constructor(
                 _uiState.emit(AuthUiState.Success(user))
             } catch (e: Exception) {
                 Log.e(TAG, "Exception processing Google auth result", e)
-                _uiState.emit(AuthUiState.Failure(0))
+                _uiState.emit(AuthUiState.Failure(R.string.login_error_message))
             }
             activeAuthJob = null
         }

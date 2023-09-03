@@ -6,9 +6,10 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseUser
 import com.hmmelton.chattr.R
-import com.hmmelton.chattr.auth.data.AuthService
+import com.hmmelton.chattr.auth.data.GoogleOneTapAuthManager
+import com.hmmelton.chattr.auth.data.UserSession
+import com.hmmelton.chattr.auth.data.UserSessionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -22,7 +23,8 @@ private const val TAG = "AuthViewModel"
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authService: AuthService,
+    private val userSession: UserSession,
+    private val oneTapAuthManager: GoogleOneTapAuthManager,
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Init)
@@ -34,13 +36,27 @@ class AuthViewModel @Inject constructor(
 
     private var activeAuthJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            emitSuccessStateWhenUserSessionBecomesActive()
+        }
+    }
+
+    private suspend fun emitSuccessStateWhenUserSessionBecomesActive() {
+        userSession.state.collect { sessionState ->
+            if (sessionState is UserSessionState.Active) {
+                _uiState.emit(AuthUiState.Success)
+            }
+        }
+    }
+
     fun onGoogleAuthClick() {
         if (activeAuthJob != null) return
 
         viewModelScope.launch(dispatcher) {
             _uiState.emit(AuthUiState.Loading)
             try {
-                val intentSenderRequest = authService.getGoogleOneTapIntentSender()
+                val intentSenderRequest = oneTapAuthManager.getGoogleOneTapIntentSender()
                 _uiState.emit(AuthUiState.ReadyForGoogleAuth(intentSenderRequest))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to create Google One Tap IntentSenderRequest", e)
@@ -52,8 +68,8 @@ class AuthViewModel @Inject constructor(
     fun processGoogleAuthResult(data: Intent?) {
         viewModelScope.launch(dispatcher) {
             try {
-                val user = authService.processGoogleAuthResult(data)
-                _uiState.emit(AuthUiState.Success(user))
+                val token = oneTapAuthManager.getGoogleIdToken(data)
+                userSession.signInWithIdToken(token)
             } catch (e: Exception) {
                 Log.e(TAG, "Exception processing Google auth result", e)
                 _uiState.emit(AuthUiState.Failure(R.string.login_error_message))
@@ -66,7 +82,7 @@ class AuthViewModel @Inject constructor(
 sealed class AuthUiState {
     data object Init : AuthUiState()
     data object Loading : AuthUiState()
-    class Success(user: FirebaseUser) : AuthUiState()
+    data object Success : AuthUiState()
     class Failure(@StringRes val errorRes: Int): AuthUiState()
     class ReadyForGoogleAuth(val googleIntentSender: IntentSenderRequest?): AuthUiState()
 }

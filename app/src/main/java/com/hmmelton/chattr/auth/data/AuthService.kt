@@ -1,42 +1,31 @@
 package com.hmmelton.chattr.auth.data
 
-import android.content.Intent
-import androidx.activity.result.IntentSenderRequest
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AuthService @Inject constructor(
-    private val oneTapClient: SignInClient,
     private val googleAuthProvider: GoogleAuthProvider,
-    private val firebaseAuth: FirebaseAuth,
-    private val googleSignInRequest: BeginSignInRequest
+    private val firebaseAuth: FirebaseAuth
 ) {
+    private val _currentUser = MutableStateFlow(firebaseAuth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser
 
-    suspend fun getGoogleOneTapIntentSender(): IntentSenderRequest {
-        val result = oneTapClient.beginSignIn(googleSignInRequest).await()
-        return IntentSenderRequest.Builder(result.pendingIntent.intentSender)
-            .build()
+    init {
+        firebaseAuth.addAuthStateListener {
+            _currentUser.value = it.currentUser
+        }
     }
 
-    suspend fun processGoogleAuthResult(data: Intent?): FirebaseUser {
-        val idToken = getGoogleIdToken(data)
-        return signInToFirebaseWithCredential(idToken)
-    }
-
-    private fun getGoogleIdToken(data: Intent?): String {
-        val googleCredential = oneTapClient.getSignInCredentialFromIntent(data)
-        return googleCredential.googleIdToken
-            ?: throw IllegalStateException("Google ID token null")
-    }
-
-    private suspend fun signInToFirebaseWithCredential(idToken: String): FirebaseUser {
+    suspend fun signInToFirebaseWithGoogleIdToken(idToken: String) {
         val firebaseCredential = googleAuthProvider.getCredential(idToken, null)
         val result = firebaseAuth.signInWithCredential(firebaseCredential).await()
-        return result.user ?: throw IllegalStateException("Firebase user null")
+        if (result.user == null) {
+            throw IllegalStateException("Firebase user null")
+        }
     }
 
     fun signOut() {

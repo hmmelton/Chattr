@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Chattr</string>
 
+    <!-- Auth screen -->
+    <string name="email_placeholder">Email</string>
+    <string name="password_placeholder">Password</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="sign_in_provider_divider_label">or</string>
+    <string name="sign_in_with_google_label">Google</string>
+
     <!-- Error messages -->
     <string name="login_error_message">Error logging in</string>
 </resources>

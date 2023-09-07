@@ -49,11 +49,19 @@ fun AuthScreen(viewModel: AuthViewModel) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         viewModel.processGoogleAuthResult(result.data)
     }
+
+    AuthScreen(
+        uiState = uiState,
+        onEmailSignInClick = { /* TODO */ },
+        onGoogleAuthClick = { viewModel.onGoogleAuthClick() }
+    )
 }
 
 @Composable
 fun AuthScreen(
-    uiState: AuthUiState
+    uiState: AuthUiState,
+    onEmailSignInClick: () -> Unit,
+    onGoogleAuthClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -66,19 +74,22 @@ fun AuthScreen(
             text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.displayMedium
         )
-        SignInOptions()
+        SignInOptions(onEmailSignInClick, onGoogleAuthClick)
     }
 }
 
 @Composable
-fun SignInOptions() {
+fun SignInOptions(
+    onEmailSignInClick: () -> Unit,
+    onGoogleAuthClick: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         EmailAndPasswordSection()
-        SignInButton()
+        SignInButton(onEmailSignInClick)
         SignInProviderDivider()
-        SignInProviderSection()
+        SignInProviderSection(onGoogleAuthClick)
     }
 }
 
@@ -107,11 +118,11 @@ fun EmailAndPasswordSection() {
 }
 
 @Composable
-fun SignInButton() {
+fun SignInButton(onClick: () -> Unit) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(dimensionResource(R.dimen.standard_padding)),
-        onClick = { /*TODO*/ }
+        onClick = onClick
     ) {
         Text(
             text = stringResource(R.string.sign_in_button),
@@ -151,14 +162,14 @@ fun SignInProviderDivider() {
 }
 
 @Composable
-fun SignInProviderSection() {
+fun SignInProviderSection(onGoogleAuthClick: () -> Unit) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(dimensionResource(R.dimen.standard_padding)),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary
         ),
-        onClick = { /*TODO*/ }
+        onClick = onGoogleAuthClick
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -187,6 +198,10 @@ fun SignInProviderSection() {
 @Preview(showBackground = true, showSystemUi = true)
 fun AuthScreenPreview() {
     ChattrTheme {
-        AuthScreen(uiState = AuthUiState.Init)
+        AuthScreen(
+            uiState = AuthUiState.Init,
+            onEmailSignInClick = {},
+            onGoogleAuthClick = {}
+        )
     }
 }

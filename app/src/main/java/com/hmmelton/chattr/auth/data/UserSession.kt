@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class UserSession @Inject constructor(private val authService: AuthService) {
     private val _state = MutableStateFlow<UserSessionState>(UserSessionState.Inactive)
     val state: StateFlow<UserSessionState> = _state

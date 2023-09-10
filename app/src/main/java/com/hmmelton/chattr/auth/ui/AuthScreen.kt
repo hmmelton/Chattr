@@ -23,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +50,10 @@ fun AuthScreen(viewModel: AuthViewModel) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         viewModel.processGoogleAuthResult(result.data)
     }
+    if (uiState is AuthUiState.ReadyForGoogleAuth) {
+        val intentSenderRequest = (uiState as AuthUiState.ReadyForGoogleAuth).googleIntentSender
+        launcher.launch(intentSenderRequest)
+    }
 
     AuthScreen(
         uiState = uiState,
@@ -63,18 +68,23 @@ fun AuthScreen(
     onEmailSignInClick: () -> Unit,
     onGoogleAuthClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(dimensionResource(R.dimen.screen_padding)),
-        verticalArrangement = Arrangement.SpaceAround
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.displayMedium
-        )
-        SignInOptions(onEmailSignInClick, onGoogleAuthClick)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(dimensionResource(R.dimen.screen_padding)),
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.displayMedium
+            )
+            SignInOptions(onEmailSignInClick, onGoogleAuthClick)
+        }
     }
 }
 
